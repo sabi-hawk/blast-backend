@@ -1,110 +1,64 @@
 import { Request, Response } from "express";
-// import User from "../../../models/User";
 import fs from "fs";
-// import { resolveContent } from "nodemailer/lib/shared";
 import path from "path";
+import { HttpError, httpMethod } from ".."; // Ensure httpMethod is imported correctly
+import Template from "@models/Template";
+import User from "@models/User";
 
-export const saveDesign = async (req: Request, res: Response) => {
-    try {
-        const userId: any = req.params.userId;
+// Save Design
+export const saveDesign = httpMethod(async (req: Request, res: Response) => {
+    const userId = req.params.userId;
+    const name = req.params.name;
 
-        const fileName = `${userId}_${Date.now()}.${req.params.name}`
-        fs.writeFileSync(path.resolve(__dirname, `../../../../public/templates/${fileName}.json`), JSON.stringify(req.body.design));
-        fs.writeFileSync(path.resolve(__dirname, `../../../../public/templates/html/${fileName}.html`), req.body.html);
+    // Validate User
+    const user = await User.findById(userId);
+    if (!user) throw new HttpError(404, "User not found");
 
-        // now fetch aal file name
-
-        fs.readdir(path.resolve(__dirname, "../../../../public/templates"), (err, files) => {
-            if (err) {
-                console.log("Error reading directory", err)
-                return res.status(500).json({ message: "Something went wrong", error: err });
-            }
-            let filteredFiles: Array<any> = [];
-            files.map((file: string) => {
-                if ((file.startsWith(userId) || file.includes("design")) && file !== "html") {
-                    filteredFiles.push(file)
-                }
-            })
-            return res.status(200).json({ files: filteredFiles, message: "Design Saved Successfully!" })
-        })
-
-        // res.status(200).json({ message: "Design Saved Successfully!" });
-    } catch (error) {
-        console.log("Error | controller | templates | saveDesign | catch", error)
-        res.status(500).json({ message: "Something went wrong", error: error });
+    // Check if file with the same name exists for this user
+    const existingTemplate = await Template.findOne({ userId, name });
+    if (existingTemplate) {
+        throw new HttpError(400, "Template name already exists. Please use a different name.");
     }
-}
 
-export const getDesign = async (req: Request, res: Response) => {
-    try {
-        let fileName: any = req?.query?.name;
-        const { name } = req.query;
-        if (name === "" || name === undefined) {
-            fileName = "emptyDesign.json"
+    // Define file paths
+    const fileName = `${userId}_${Date.now()}`;
+    const jsonFilePath = path.resolve(__dirname, `../../../../public/templates/${fileName}.json`);
+    const htmlFilePath = path.resolve(__dirname, `../../../../public/templates/html/${fileName}.html`);
+
+    // Save files
+    fs.writeFileSync(jsonFilePath, JSON.stringify(req.body.design));
+    fs.writeFileSync(htmlFilePath, req.body.html);
+
+    // Save to database
+    const newTemplate = new Template({ userId, name, jsonPath: jsonFilePath, htmlPath: htmlFilePath });
+    await newTemplate.save();
+
+    // Return success response
+    res.status(200).json({ message: "Design Saved Successfully!" });
+});
+
+// Get Design
+export const getDesign = httpMethod(async (req: Request, res: Response) => {
+    const fileName = req.query.name as string;
+    if (!fileName) throw new HttpError(400, "File name is required");
+
+    const template = await Template.findOne({ name: fileName });
+    if (!template) throw new HttpError(404, "Design not found");
+
+    fs.readFile(template.jsonPath, "utf-8", (err, jsonString) => {
+        if (err) {
+            throw new HttpError(500, "Error reading jsonDesign");
         }
-        fs.readFile(path.resolve(__dirname, `../../../../public/templates/${fileName}`), "utf-8", (err, jsonString) => {
-            if (err) {
-                console.log("Error reading jsonDesign", err);
-                return res.status(500).json({ message: "Something went wrong", error: err });
-            }
-            try {
-                const jsonDesign = JSON.parse(jsonString);
-                res.status(200).json({ design: jsonDesign });
-            } catch (err) {
-                console.log("Error parsing JSON string:", err);
-                res.status(500).json({ message: "Something went wrong", error: err });
-            }
-        });
-    } catch (error) {
-        console.log("Error | controller | templates | getDesign | catch", error)
-        res.status(500).json({ message: "Something went wrong", error: error });
-    }
-}
+        res.status(200).json({ design: JSON.parse(jsonString) });
+    });
+});
 
-export const getHtml = async (req: Request, res: Response) => {
-    try {
-        let fileName: any = req?.query?.name;
-        const { name } = req.query;
-        if (name === "" || name === undefined) {
-            fileName = "emptyDesign.json"
-        }
-        fs.readFile(path.resolve(__dirname, `../../../../public/templates/${fileName}`), "utf-8", (err, jsonString) => {
-            if (err) {
-                console.log("Error reading jsonDesign", err);
-                return res.status(500).json({ message: "Something went wrong", error: err });
-            }
-            try {
-                const jsonDesign = JSON.parse(jsonString);
-                res.status(200).json({ design: jsonDesign });
-            } catch (err) {
-                console.log("Error parsing JSON string:", err);
-                res.status(500).json({ message: "Something went wrong", error: err });
-            }
-        });
-    } catch (error) {
-        console.log("Error | controller | templates | getDesign | catch", error)
-        res.status(500).json({ message: "Something went wrong", error: error });
-    }
-}
+// Get Design Names for User
+export const getDesignNames = httpMethod(async (req: Request, res: Response) => {
+    const userId = req.params.userId;
+    const user = await User.findById(userId);
+    if (!user) throw new HttpError(404, "User not found");
 
-export const getDesignNames = async (req: Request, res: Response) => {
-    try {
-        const userId: any = req.params.userId
-        fs.readdir(path.resolve(__dirname, "../../../../public/templates"), (err, files) => {
-            if (err) {
-                console.log("Error reading directory", err)
-                return res.status(500).json({ message: "Something went wrong", error: err });
-            }
-            let filteredFiles: Array<any> = [];
-            files.map((file: string) => {
-                if ((file.startsWith(userId) || file.includes("design")) && file !== "html") {
-                    filteredFiles.push(file)
-                }
-            })
-            return res.status(200).json({ files: filteredFiles })
-        })
-    } catch (error) {
-        console.log("Error | controller | templates | getDesignNames | catch", error)
-        res.status(500).json({ message: "Something went wrong", error: error });
-    }
-}
+    const templates = await Template.find({ userId }).select("name");
+    res.status(200).json({ files: templates.map(template => template.name) });
+});
