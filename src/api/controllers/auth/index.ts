@@ -12,7 +12,7 @@ export const register = httpMethod(async (req: Request, res: Response): Promise<
     const reqData = await validateRegisterRequest(req);
     const existingUser = await User.findOne({ email: reqData.email });
     if (existingUser) {
-        throw new HttpError(400, "Email Already Exists!");
+        throw new HttpError(400, "Email  Exists!");
     }
     const hashedPassword = await bcrypt.hash(reqData.password, 10);
     const user = await User.create({ ...reqData, password: hashedPassword });
