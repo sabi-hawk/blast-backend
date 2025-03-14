@@ -48,30 +48,6 @@ export const sendMessage = httpMethod(async (req: Request, res: Response): Promi
 
 })
 
-export const getMessage = httpMethod(async (req: Request, res: Response): Promise<void> => {
-    const { chatId, messageId } = req.params
-
-    const chat = await Conversation.find({ _id: chatId, "messages._id": messageId });
-    if (!chat) {
-        res.status(404).json({ message: "Chat not found!" })
-    }
-    let memberFound: Boolean = false;
-    if (!memberFound) {
-        throw new HttpError(404, "You are not member of this chat!");
-    }
-    const updatedChat = await Conversation.findByIdAndUpdate(chatId,
-        {
-            $push: {
-                messages: {
-                    senderId: req.body.senderId,
-                    text: req.body.text
-                }
-            }
-        },
-        { new: true })
-    res.status(200).json(updatedChat);
-
-})
 
 export const userChats = httpMethod(async (req: Request, res: Response) => {
 
@@ -122,14 +98,7 @@ export const userChats = httpMethod(async (req: Request, res: Response) => {
 
 })
 
-export const findChat = httpMethod(async (req: Request, res: Response) => {
 
-    const chat = await Conversation.find({
-        members: { $all: [req.params.firstId, req.params.secondId] }
-    })
-    res.status(200).json(chat);
-
-})
 
 export const getChat = httpMethod(async (req: Request, res: Response) => {
 
@@ -138,9 +107,3 @@ export const getChat = httpMethod(async (req: Request, res: Response) => {
 
 })
 
-export const getChatMessages = httpMethod(async (req: Request, res: Response) => {
-
-    const chat = await Conversation.findOne({ _id: req.params.chatId })
-    res.status(200).json(chat?.messages);
-
-})
