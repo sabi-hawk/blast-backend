@@ -3,14 +3,7 @@ import { HttpError, httpMethod } from "..";
 import Conversation from "@models/Conversation";
 import { authenticateRequest } from "@middleware/auth";
 
-export const createConversation = httpMethod(async (req: Request, res: Response) => {
-    const data = await authenticateRequest(req, res);
-    const chat = await new Conversation({
-        members: [data.userId, req.body.receiverId]
-    }).save();
 
-    res.status(200).json(chat);
-})
 
 
 export const userChats = httpMethod(async (req: Request, res: Response) => {
