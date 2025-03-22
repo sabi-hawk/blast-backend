@@ -8,7 +8,16 @@ import User, { UserType } from "@models/User";
 import Session from "@models/Session";
 
 
-
+export const register = httpMethod(async (req: Request, res: Response): Promise<void> => {
+    const reqData = await validateRegisterRequest(req);
+    const existingUser = await User.findOne({ email: reqData.email });
+    if (existingUser) {
+        throw new HttpError(400, "Email Already Exists!");
+    }
+    const hashedPassword = await bcrypt.hash(reqData.password, 10);
+    const user = await User.create({ ...reqData, password: hashedPassword });
+    res.status(201).json({ user: { username: user.username, email: user.email }, message: "Signed Up Successfully !" })
+})
 
 export const login = httpMethod(async (req: Request, res: Response) => {
     const reqData = await validateLoginRequest(req);
