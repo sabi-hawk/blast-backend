@@ -101,7 +101,14 @@ export const sendMessage = httpMethod(async (req: Request, res: Response): Promi
 })
 
 
+export const findChat = httpMethod(async (req: Request, res: Response) => {
 
+    const chat = await Conversation.find({
+        members: { $all: [req.params.firstId, req.params.secondId] }
+    })
+    res.status(200).json(chat);
+
+})
 
 export const getChatMessages = httpMethod(async (req: Request, res: Response) => {
 
