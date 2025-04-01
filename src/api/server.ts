@@ -82,7 +82,6 @@ socket.on('connection', (client) => {
   })
 
   client.on('send-message', (data: any) => {
-    // const { receiverId } = data;
     const user = activeUsers.find((user) => user.socketId !== client.id)
     if (user) {
       socket.to(user.socketId).emit("receive-message", data)
