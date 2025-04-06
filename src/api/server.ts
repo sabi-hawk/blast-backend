@@ -97,5 +97,8 @@ socket.on('connection', (client) => {
       socket.to(user.socketId).emit("receive-notification", data)
     }
   })
-  
+  client.on('disconnect', () => {
+    activeUsers = activeUsers.filter((user: socketUser) => user.socketId !== client.id)
+    socket.emit('get-users', activeUsers);
+  })
 })
