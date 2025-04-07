@@ -1,19 +1,21 @@
 {
   "compilerOptions": {
-    "target": "ES2020",         // Choose the desired ECMAScript version
-    "module": "CommonJS",       // Use CommonJS for Node.js compatibility
-    "outDir": "./dist",         // Output directory for compiled JavaScript
-    "rootDir": "./src",         // Root directory for TypeScript files
-    "strict": true,             // Enable strict type checking
-    "esModuleInterop": true,    // Enable compatibility with CommonJS modules
-    "skipLibCheck": true,        // Skip library checks for faster compilation
+    "target": "ES2020", // Choose the desired ECMAScript version
+    "module": "CommonJS", // Use CommonJS for Node.js compatibility
+    "outDir": "./dist", // Output directory for compiled JavaScript
+    "rootDir": "./src", // Root directory for TypeScript files
+    "strict": true, // Enable strict type checking
+    "esModuleInterop": true, // Enable compatibility with CommonJS modules
+    "skipLibCheck": true, // Skip library checks for faster compilation
+    "resolveJsonModule": true, // Add this line to enable JSON module resolution
     "paths": {
       "@models/*": ["src/models/*"],
       "@config/*": ["src/config/*"],
       "@utils/*": ["src/utils/*"],
       "@controllers/*": ["src/api/controllers/*"],
       "@routes/*": ["src/api/routes/*"],
-      "@middleware/*": ["src/api/middleware/*"]
+      "@middleware/*": ["src/api/middleware/*"],
+      "@public/*": ["public/*"] // Add this for the public directory
     }
   },
   "include": ["src/**/*.ts"],   // Include all TypeScript files in src
