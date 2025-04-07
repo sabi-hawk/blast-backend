@@ -59,6 +59,12 @@ export const getDesignNames = httpMethod(async (req: Request, res: Response) => 
     const user = await User.findById(userId);
     if (!user) throw new HttpError(404, "User not found");
 
-    const templates = await Template.find({ userId }).select("name");
-    res.status(200).json({ files: templates.map(template => template.name) });
+    const templates = await Template.find({ userId }).select("_id name");
+
+    res.status(200).json({
+        files: templates.map(template => ({
+            _id: template._id,
+            name: template.name,
+        })),
+    });
 });
