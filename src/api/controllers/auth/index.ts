@@ -6,18 +6,51 @@ import bcrypt from "bcrypt";
 import { SECRET } from "@config/app/index";
 import User, { UserType } from "@models/User";
 import Session from "@models/Session";
+import Conversation from "@models/Conversation";
 
 
+// export const register = httpMethod(async (req: Request, res: Response): Promise<void> => {
+//     const reqData = await validateRegisterRequest(req);
+//     const existingUser = await User.findOne({ email: reqData.email });
+//     if (existingUser) {
+//         throw new HttpError(400, "Email Already Exists!");
+//     }
+//     const hashedPassword = await bcrypt.hash(reqData.password, 10);
+//     const user = await User.create({ ...reqData, password: hashedPassword });
+//     res.status(201).json({ user: { username: user.username, email: user.email }, message: "Signed Up Successfully !" })
+// })
 export const register = httpMethod(async (req: Request, res: Response): Promise<void> => {
     const reqData = await validateRegisterRequest(req);
+
+    // Check if the email already exists
     const existingUser = await User.findOne({ email: reqData.email });
     if (existingUser) {
         throw new HttpError(400, "Email Already Exists!");
     }
+
+    // Hash the password before storing it
     const hashedPassword = await bcrypt.hash(reqData.password, 10);
+
+    // Create the new user
     const user = await User.create({ ...reqData, password: hashedPassword });
-    res.status(201).json({ user: { username: user.username, email: user.email }, message: "Signed Up Successfully !" })
-})
+
+    // If the user role is 'client', create a conversation with the provider
+    if (reqData.role === "client" && reqData.providerId) {
+        const conversation = await new Conversation({
+            members: [user._id, reqData.providerId]
+        }).save();
+
+        // Optionally, return the conversation id or any other details if required
+        console.log(`Conversation created between client ${user.username} and provider.`);
+    }
+
+    // Send the response back to the client
+    res.status(201).json({
+        user: { username: user.username, email: user.email },
+        message: "Signed Up Successfully !"
+    });
+});
+
 
 export const login = httpMethod(async (req: Request, res: Response) => {
     const reqData = await validateLoginRequest(req);
