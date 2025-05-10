@@ -438,3 +438,15 @@
 {"level":"debug","message":"Http Request | Error: GET : /api/conversation/user/676fee641f1dee821adf28af"}
 {"level":"debug","message":"Http Request | Start: GET : /api/conversation/user/676fee641f1dee821adf28af"}
 {"level":"debug","message":"Http Request | Error: GET : /api/conversation/user/676fee641f1dee821adf28af"}
+{"level":"debug","message":"Http Request | Start: POST : /api/auth/register"}
+{"level":"debug","message":"Http Request | Complete: POST : /api/auth/register"}
+{"level":"debug","message":"Http Request | Start: POST : /api/auth/login"}
+{"level":"debug","message":"Http Request | Error: POST : /api/auth/login"}
+{"level":"debug","message":"Http Request | Start: POST : /api/auth/login"}
+{"level":"debug","message":"Http Request | Complete: POST : /api/auth/login"}
+{"level":"debug","message":"Http Request | Start: GET : /api/templates/user/681f3270ed6ad641a9cb40b9/names"}
+{"level":"debug","message":"Http Request | Complete: GET : /api/templates/user/681f3270ed6ad641a9cb40b9/names"}
+{"level":"debug","message":"Http Request | Start: POST : /api/leads/import/681f3270ed6ad641a9cb40b9"}
+{"level":"debug","message":"Http Request | Error: POST : /api/leads/import/681f3270ed6ad641a9cb40b9"}
+{"level":"debug","message":"Http Request | Start: POST : /api/leads/import/681f3270ed6ad641a9cb40b9"}
+{"level":"debug","message":"Http Request | Complete: POST : /api/leads/import/681f3270ed6ad641a9cb40b9"}
