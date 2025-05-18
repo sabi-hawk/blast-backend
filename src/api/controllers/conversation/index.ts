@@ -4,9 +4,10 @@ import Conversation from "@models/Conversation";
 import { authenticateRequest } from "@middleware/auth";
 
 export const createConversation = httpMethod(async (req: Request, res: Response) => {
-    const data = await authenticateRequest(req, res);
+    // const data = await authenticateRequest(req, res);
     const chat = await new Conversation({
-        members: [data.userId, req.body.receiverId]
+        // @ts-ignore
+        members: [req.user?.userId, req.body.receiverId]
     }).save();
 
     res.status(200).json(chat);
@@ -14,9 +15,9 @@ export const createConversation = httpMethod(async (req: Request, res: Response)
 
 export const userChats = httpMethod(async (req: Request, res: Response) => {
 
-    const data = await authenticateRequest(req, res);
+    // const data = await authenticateRequest(req, res);
     // @ts-ignore
-    if (req.params.userId !== data?.userId) {
+    if (req.params.userId !== req.user?.userId) {
         throw new HttpError(401, "You are not authorized to access this chat.");
     }
     // const chat = await Conversation.find({
@@ -63,9 +64,9 @@ export const userChats = httpMethod(async (req: Request, res: Response) => {
 
 export const sendMessage = httpMethod(async (req: Request, res: Response): Promise<void> => {
     const { chatId } = req.params
-    const data = await authenticateRequest(req, res);
+    // const data = await authenticateRequest(req, res);
     // @ts-ignore
-    if (req.body?.senderId !== data?.userId) {
+    if (req.body?.senderId !== req.user?.userId) {
         throw new HttpError(401, "You are not authorized to access this chat.");
     }
     const chat = await Conversation.findById(chatId);

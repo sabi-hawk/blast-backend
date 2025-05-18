@@ -1,15 +1,16 @@
 import { Router } from "express";
 import * as conversationController from "@controllers/conversation";
+import { authenticateRequest } from "@middleware/auth";
 
 const conversationRouter = Router();
 
-conversationRouter.post("/",conversationController.createConversation);
-conversationRouter.post("/:chatId/message", conversationController.sendMessage);
-conversationRouter.get("/:chatId/message/:messageId", conversationController.getMessage);
-conversationRouter.get("/user/:userId", conversationController.userChats);
-conversationRouter.get("/find/:firstId/:secondId", conversationController.findChat)
-conversationRouter.get("/:chatId", conversationController.getChat);
-conversationRouter.get("/:chatId/messages", conversationController.getChatMessages);
+conversationRouter.post("/", authenticateRequest, conversationController.createConversation);
+conversationRouter.post("/:chatId/message", authenticateRequest, conversationController.sendMessage);
+conversationRouter.get("/:chatId/message/:messageId", authenticateRequest, conversationController.getMessage);
+conversationRouter.get("/user/:userId", authenticateRequest, conversationController.userChats);
+conversationRouter.get("/find/:firstId/:secondId", authenticateRequest, conversationController.findChat)
+conversationRouter.get("/:chatId", authenticateRequest, conversationController.getChat);
+conversationRouter.get("/:chatId/messages", authenticateRequest, conversationController.getChatMessages);
 
 export default conversationRouter;
 
