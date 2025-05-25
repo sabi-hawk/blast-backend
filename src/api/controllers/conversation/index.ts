@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { HttpError, httpMethod } from "..";
 import Conversation from "@models/Conversation";
+import About from "@models/About";
 import { authenticateRequest } from "@middleware/auth";
 
 export const createConversation = httpMethod(async (req: Request, res: Response) => {
@@ -14,16 +15,11 @@ export const createConversation = httpMethod(async (req: Request, res: Response)
 })
 
 export const userChats = httpMethod(async (req: Request, res: Response) => {
-
-    // const data = await authenticateRequest(req, res);
     // @ts-ignore
     if (req.params.userId !== req.user?.userId) {
         throw new HttpError(401, "You are not authorized to access this chat.");
     }
-    // const chat = await Conversation.find({
-    //     members: { $in: [req.params.userId] }
-    // })
-    // res.status(200).json({ conversations: chat });
+
     const chats = await Conversation.find({
         members: { $in: [req.params.userId] }
     }).populate('members', '-password');
@@ -35,31 +31,30 @@ export const userChats = httpMethod(async (req: Request, res: Response) => {
     }, []);
 
     // Find about data for the userIds
-    // const aboutData = await About.find({ userId: { $in: userIds } });
+    const aboutData = await About.find({ userId: { $in: userIds } });
 
     // Create a map of userId to about data
-    // const aboutDataMap = new Map();
-    // aboutData.forEach((about) => {
-    //     // @ts-ignore
-    //     aboutDataMap.set(about.userId.toString(), about);
-    // });
+    const aboutDataMap = new Map();
+    aboutData.forEach((about) => {
+        // @ts-ignore
+        aboutDataMap.set(about.userId.toString(), about);
+    });
 
     // Append about data to each user in the chat
-    // const chatsWithAbout = chats.map((chat) => {
-    //     const membersWithAbout = chat.members.map((member) => ({
-    //         // @ts-ignore
-    //         ...member._doc,
-    //         about: aboutDataMap.get(member._id.toString()),
-    //     }));
-    //     return {
-    //         // @ts-ignore
-    //         ...chat._doc,
-    //         members: membersWithAbout,
-    //     };
-    // });
+    const chatsWithAbout = chats.map((chat) => {
+        const membersWithAbout = chat.members.map((member) => ({
+            // @ts-ignore
+            ...member._doc,
+            profilePic: aboutDataMap.get(member._id.toString())?.profilePic || null,
+        }));
+        return {
+            // @ts-ignore
+            ...chat._doc,
+            members: membersWithAbout,
+        };
+    });
 
-    res.status(200).json({ conversations: chats });
-
+    res.status(200).json({ conversations: chatsWithAbout });
 })
 
 export const sendMessage = httpMethod(async (req: Request, res: Response): Promise<void> => {

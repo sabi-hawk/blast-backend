@@ -7,18 +7,9 @@ import { SECRET } from "@config/app/index";
 import User, { UserType } from "@models/User";
 import Session from "@models/Session";
 import Conversation from "@models/Conversation";
+import About from "@models/About";
 
 
-// export const register = httpMethod(async (req: Request, res: Response): Promise<void> => {
-//     const reqData = await validateRegisterRequest(req);
-//     const existingUser = await User.findOne({ email: reqData.email });
-//     if (existingUser) {
-//         throw new HttpError(400, "Email Already Exists!");
-//     }
-//     const hashedPassword = await bcrypt.hash(reqData.password, 10);
-//     const user = await User.create({ ...reqData, password: hashedPassword });
-//     res.status(201).json({ user: { username: user.username, email: user.email }, message: "Signed Up Successfully !" })
-// })
 export const register = httpMethod(async (req: Request, res: Response): Promise<void> => {
     const reqData = await validateRegisterRequest(req);
 
@@ -33,6 +24,11 @@ export const register = httpMethod(async (req: Request, res: Response): Promise<
 
     // Create the new user
     const user = await User.create({ ...reqData, password: hashedPassword });
+
+    // Create About document for the new user
+    await About.create({
+        userId: user._id,
+    });
 
     // If the user role is 'client', create a conversation with the provider
     if (reqData.role === "client" && reqData.providerId) {
@@ -50,7 +46,6 @@ export const register = httpMethod(async (req: Request, res: Response): Promise<
         message: "Signed Up Successfully !"
     });
 });
-
 
 export const login = httpMethod(async (req: Request, res: Response) => {
     const reqData = await validateLoginRequest(req);

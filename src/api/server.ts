@@ -23,7 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
 
 const corsOptions = {
-  origin: ['http://example.com', 'http://localhost:3000'],
+  origin: ['http://example.com', 'http://localhost:3000', 'http://localhost:3001'],
 };
 
 app.use(cors(corsOptions));
@@ -37,7 +37,8 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/images", express.static(path.join(__dirname, '../../uploads')))
+// Serve static files from uploads directory
+app.use("/uploads", express.static(path.join(__dirname, '../../uploads')));
 
 if (!process.env.MONGO_DB_CONNECTION_STRING) {
   throw new Error('MONGO_DB_CONNECTION_STRING is not defined in environment variables');
