@@ -66,6 +66,6 @@ export const authenticateRequest = async (req: Request, res: Response, next: Nex
         next();
     } catch (error: any) {
         console.error("Auth Error:", error.message);
-        res.status(error.statusCode || 500).json({ message: error.message });
+        res.status(error.status || 500).json({ message: error.message });
     }
 };

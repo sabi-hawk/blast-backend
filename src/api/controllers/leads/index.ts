@@ -4,6 +4,7 @@ import fs from "fs";
 import Lead from "@models/Lead";
 import User from "@models/User";
 import { httpMethod, HttpError } from ".."; // assuming your existing structure
+import { Types } from "mongoose";
 
 export const importLeads = httpMethod(async (req: Request, res: Response) => {
   const userId = req.params.userId;
@@ -90,4 +91,21 @@ export const deleteLead = httpMethod(async (req: Request, res: Response) => {
   await lead.deleteOne();
 
   res.status(200).json({ message: "Lead deleted successfully" });
+});
+
+export const getUserGroupsWithCounts = httpMethod(async (req: Request, res: Response) => {
+  // @ts-ignore
+  const userId = req.user?.userId;
+  console.log("TESTING USER ID");
+  console.log(userId);
+  if (!userId) throw new HttpError(400, "User ID is missing from token");
+
+  // Aggregate unique groupIds and their counts for this user
+  const groups = await Lead.aggregate([
+    { $match: { userId: new Types.ObjectId(userId) } },
+    { $group: { _id: "$groupId", count: { $sum: 1 } } },
+    { $project: { groupId: "$_id", count: 1, _id: 0 } },
+  ]);
+
+  res.status(200).json({ groups });
 });
