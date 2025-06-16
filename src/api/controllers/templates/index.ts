@@ -20,7 +20,8 @@ interface PublicTemplate {
 export const saveDesign = httpMethod(async (req: Request, res: Response) => {
     const userId = req.params.userId;
     const templateId = req.params.id; // Optional
-
+    console.log("TEMPLATE ID");
+    console.log(templateId);
     // Validate User
     const user = await User.findById(userId);
     if (!user) throw new HttpError(404, "User not found");
@@ -28,9 +29,11 @@ export const saveDesign = httpMethod(async (req: Request, res: Response) => {
     let template;
     let message;
 
-    if (templateId) {
+    // If templateId is public or not provided, treat as new template
+    if (templateId && !templateId.startsWith("public")) {
         // UPDATE existing template
         template = await Template.findById(templateId);
+        console.log("TEMPLATE ID Check 2");
         if (!template) throw new HttpError(404, "Template not found");
 
         // Update files
@@ -42,6 +45,13 @@ export const saveDesign = httpMethod(async (req: Request, res: Response) => {
         message = "Design Updated Successfully!";
     } else {
         // CREATE new template
+        // Check for duplicate name in public templates
+        const publicNameExists = publicTemplates.some((t: any) => t.name === req.params.name);
+        if (publicNameExists) throw new HttpError(400, "Template name already exists in public templates");
+        // Check for duplicate name in user's templates
+        const userTemplateExists = await Template.findOne({ userId, name: req.params.name });
+        if (userTemplateExists) throw new HttpError(400, "Template name already exists");
+
         const fileName = `${userId}_${Date.now()}`;
         const jsonFilePath = path.resolve(__dirname, `../../../../public/templates/${fileName}.json`);
         const htmlFilePath = path.resolve(__dirname, `../../../../public/templates/html/${fileName}.html`);
@@ -61,9 +71,19 @@ export const saveDesign = httpMethod(async (req: Request, res: Response) => {
 
     // Return response
     const templates = await Template.find({ userId }).select("_id name");
+    const allTemplates = [
+        ...templates.map((t) => ({
+            _id: t._id,
+            name: t.name,
+        })),
+        ...publicTemplates.map((template: PublicTemplate) => ({
+            _id: template._id,
+            name: template.name,
+        })),
+    ];
     res.status(200).json({
         message,
-        files: templates.map((t) => ({ _id: t._id, name: t.name })),
+        files: allTemplates,
     });
 });
 

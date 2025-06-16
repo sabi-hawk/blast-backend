@@ -6,7 +6,7 @@ export const addCampaign = httpMethod(async (req: Request, res: Response) => {
   // @ts-ignore
   const userId = req.user?.userId;
   if (!userId) throw new HttpError(400, "User ID is missing from token");
-  const { template, groupIds, campaignName, description, scheduled, scheduleDate } = req.body;
+  const { template, groupIds, campaignName, description, scheduled, scheduleDate, totalLeads } = req.body;
   if (!campaignName) throw new HttpError(400, "Campaign name is required");
   let status: "Scheduled" | "In Progress" | "Completed" = "In Progress";
   if (scheduled) status = "Scheduled";
@@ -18,6 +18,7 @@ export const addCampaign = httpMethod(async (req: Request, res: Response) => {
     description,
     status,
     scheduleDate,
+    totalLeads,
   });
   await campaign.save();
   res.status(201).json({ message: "Campaign created successfully", data: campaign });
@@ -37,6 +38,7 @@ export const getCampaigns = httpMethod(async (req: Request, res: Response) => {
     scheduleDate: c.scheduleDate,
     status: c.status,
     description: c.description,
+    totalLeads: c.totalLeads,
   }));
   res.status(200).json({ data });
 });
