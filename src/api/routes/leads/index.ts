@@ -18,5 +18,6 @@ leadsRouter.get("/", authenticateRequest, leadsController.getLeads);
 leadsRouter.put("/:leadId", authenticateRequest, leadsController.updateLead);
 leadsRouter.delete("/:leadId", authenticateRequest, leadsController.deleteLead);
 leadsRouter.get("/groups/summary", authenticateRequest, getUserGroupsWithCounts);
+leadsRouter.get("/analytics", authenticateRequest, leadsController.getLeadAnalytics);
 
 export default leadsRouter;

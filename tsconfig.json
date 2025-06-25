@@ -4,6 +4,7 @@
     "module": "CommonJS", // Use CommonJS for Node.js compatibility
     "outDir": "./dist", // Output directory for compiled JavaScript
     "rootDir": "./src", // Root directory for TypeScript files
+    "baseUrl": "./", // Base URL for path mapping
     "strict": true, // Enable strict type checking
     "esModuleInterop": true, // Enable compatibility with CommonJS modules
     "skipLibCheck": true, // Skip library checks for faster compilation

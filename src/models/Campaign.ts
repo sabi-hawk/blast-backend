@@ -10,6 +10,7 @@ export interface CampaignType extends Document {
   status: "Scheduled" | "In Progress" | "Completed";
   scheduleDate?: Date;
   totalLeads: number;
+  mailSubject: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,6 +27,7 @@ const CampaignSchema = new Schema<CampaignType>({
   status: { type: String, enum: ["Scheduled", "In Progress", "Completed"], default: "In Progress" },
   scheduleDate: { type: Date },
   totalLeads: { type: Number, required: true },
+  mailSubject: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

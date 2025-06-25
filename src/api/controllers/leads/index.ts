@@ -109,3 +109,37 @@ export const getUserGroupsWithCounts = httpMethod(async (req: Request, res: Resp
 
   res.status(200).json({ groups });
 });
+
+export const getLeadAnalytics = httpMethod(async (req: Request, res: Response) => {
+  // @ts-ignore
+  const userId = req.user?.userId;
+  if (!userId) throw new HttpError(400, "User ID is missing from token");
+
+  // Total leads
+  const total = await Lead.countDocuments({ userId });
+
+  // Leads per group
+  const perGroup = await Lead.aggregate([
+    { $match: { userId: new Types.ObjectId(userId) } },
+    { $group: { _id: "$groupId", count: { $sum: 1 } } },
+    { $sort: { count: -1 } }
+  ]);
+
+  // Leads per month (last 12 months)
+  const monthly = await Lead.aggregate([
+    { $match: { userId: new Types.ObjectId(userId) } },
+    {
+      $group: {
+        _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+        count: { $sum: 1 }
+      }
+    },
+    { $sort: { "_id": 1 } }
+  ]);
+
+  res.status(200).json({
+    stats: { total },
+    perGroup,
+    monthly
+  });
+});
